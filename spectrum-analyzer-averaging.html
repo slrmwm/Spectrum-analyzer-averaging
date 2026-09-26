@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spectrum Analyzer + Averaging</title>
+<style>body{margin:0;padding:16px;background:#0d0c0f;color:#f3eff1;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:1080px;margin:0 auto}</style>
+</head>
+<body>
+<main>
+<section class="sfsa" data-sf-spectrum-analyzer aria-labelledby="sfsa-title">
+  <style>
+    .sfsa{--bg:#171519;--panel:#211e24;--line:#4f4853;--text:#f3eff1;--muted:#bdb4bc;--pink:#ff4f91;--teal:#55d6c3;--grid:#3a353d;margin:1.5rem 0 2.4rem;border:1px solid #4b454e;border-radius:18px;background:var(--bg);color:var(--text);overflow:hidden;box-shadow:0 18px 45px rgba(20,10,17,.14);font-family:inherit}
+    .sfsa *{box-sizing:border-box}.sfsa button,.sfsa select,.sfsa input{font:inherit}.sfsa button{min-height:44px;border:1px solid #665e69;border-radius:10px;background:#28242b;color:var(--text);padding:.68rem .9rem;font-weight:700;cursor:pointer}.sfsa button:hover{border-color:var(--pink);background:#302832}.sfsa button:focus-visible,.sfsa select:focus-visible,.sfsa input:focus-visible{outline:3px solid rgba(255,79,145,.38);outline-offset:2px}.sfsa button[aria-pressed="true"],.sfsa .sfsa-primary{border-color:var(--pink);background:#7a2145}.sfsa button:disabled{opacity:.45;cursor:not-allowed}
+    .sfsa-head{display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;padding:1.25rem 1.35rem;border-bottom:1px solid var(--line)}.sfsa-kicker{margin:0 0 .35rem;color:var(--pink);font:700 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase}.sfsa h2{margin:0;font-size:clamp(1.45rem,3vw,2rem);line-height:1.1;color:var(--text)}.sfsa-sub{max-width:52rem;margin:.55rem 0 0;color:var(--muted);font-size:.98rem;line-height:1.5}.sfsa-status{flex:0 0 auto;display:inline-flex;align-items:center;gap:.45rem;color:var(--muted);font:700 .76rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.08em;padding:.38rem .55rem;border:1px solid var(--line);border-radius:999px}.sfsa-status::before{content:"";width:.55rem;height:.55rem;border-radius:50%;background:#787078}.sfsa-status[data-active="true"]::before{background:var(--teal);box-shadow:0 0 0 4px rgba(85,214,195,.12)}
+    .sfsa-inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;padding:1rem 1.35rem;border-bottom:1px solid var(--line)}.sfsa-inputs button{width:100%}.sfsa-file{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+    .sfsa-filebar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:.65rem;align-items:center;padding:.8rem 1.35rem;border-bottom:1px solid var(--line);background:#1c191e}.sfsa-filemeta{min-width:0;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sfsa-filemeta strong{color:var(--text)}
+    .sfsa-disclosure{border-bottom:1px solid var(--line);background:#1c191e}.sfsa-peak-disclosure{border-top:1px solid var(--line)}.sfsa-disclosure>summary{display:flex;align-items:center;gap:.8rem;min-height:44px;padding:.55rem 1.35rem;list-style:none;cursor:pointer;color:var(--text);font-size:.86rem;font-weight:800}.sfsa-disclosure>summary::-webkit-details-marker{display:none}.sfsa-disclosure>summary::after{content:'+';color:var(--pink);font-size:1.05rem}.sfsa-disclosure[open]>summary::after{content:'−'}.sfsa-disclosure>summary small{margin-left:auto;color:var(--muted);font-size:.74rem;font-weight:600}
+    .sfsa-genbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(14rem,20rem) auto;gap:.65rem;align-items:center;padding:.8rem 1.35rem;border-bottom:1px solid var(--line);background:#1c191e}.sfsa-genmeta{min-width:0;color:var(--muted);font-size:.9rem;line-height:1.4}.sfsa-genmeta strong{color:var(--text)}.sfsa-genlevel{display:grid;grid-template-columns:auto minmax(0,1fr) 7.2rem;gap:.5rem;align-items:center}.sfsa-genlevel label{color:var(--muted);font-size:.78rem;font-weight:700}.sfsa-genlevel input{width:100%}.sfsa-genlevel output{text-align:right;color:var(--text);font:700 .8rem/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .sfsa-field select:disabled{opacity:.45;cursor:not-allowed}.sfsa-avgstatus{align-self:center;color:#ffd166;font:700 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace}.sfsa-avgstatus:empty{display:none}
+    .sfsa-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:1rem 1.35rem;border-bottom:1px solid var(--line)}.sfsa-field{display:grid;gap:.35rem}.sfsa-field label{color:var(--muted);font-size:.78rem;font-weight:700}.sfsa-field select,.sfsa-field input[type="range"]{width:100%;min-height:44px;border:1px solid #665e69;border-radius:9px;background:#28242b;color:var(--text);padding:.55rem .7rem}.sfsa-range{display:grid;grid-template-columns:minmax(0,1fr) 3.2rem;gap:.5rem;align-items:center}.sfsa-range output{text-align:right;color:var(--text);font:700 .82rem/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .sfsa-view{padding:1rem 1.35rem}.sfsa-canvaswrap{position:relative;min-height:330px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0f1114}.sfsa canvas{display:block;width:100%;height:360px;touch-action:none}.sfsa-cursor{position:absolute;pointer-events:none;display:none;z-index:2;padding:.38rem .5rem;border:1px solid #7d7380;border-radius:7px;background:rgba(20,17,21,.94);color:var(--text);font:700 .74rem/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}.sfsa-canvaswrap[data-cursor="true"] .sfsa-cursor{display:block}
+    .sfsa-actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.75rem}.sfsa-actions button{min-height:40px;padding:.5rem .75rem;font-size:.86rem}.sfsa-resolution{margin-left:auto;align-self:center;color:var(--muted);font:700 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .sfsa-readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:0 1.35rem 1rem}.sfsa-card{min-height:92px;padding:.85rem 1rem;border:1px solid var(--line);border-radius:11px;background:var(--panel)}.sfsa-card span{display:block;margin-bottom:.4rem;color:var(--muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}.sfsa-card strong{display:block;color:var(--text);font-size:1.35rem;line-height:1.15}.sfsa-card small{display:block;margin-top:.32rem;color:var(--muted);line-height:1.35}
+    .sfsa-peaks{padding:0 1.35rem 1.25rem}.sfsa-peaks h3{margin:0 0 .65rem;color:var(--text);font-size:1.05rem}.sfsa-table{width:100%;border-collapse:collapse;color:var(--text);font-size:.88rem}.sfsa-table th,.sfsa-table td{padding:.62rem .7rem;border-top:1px solid var(--line);text-align:left}.sfsa-table th{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.07em}.sfsa-table td:first-child{width:3rem;color:var(--pink);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .sfsa-foot{display:flex;gap:1rem;justify-content:space-between;padding:.9rem 1.35rem;border-top:1px solid var(--line);background:#1c191e;color:var(--muted);font-size:.82rem;line-height:1.45}.sfsa-foot strong{color:var(--text)}.sfsa-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+    @media(max-width:760px){.sfsa{border-radius:13px}.sfsa-head{display:block;padding:1rem}.sfsa-status{margin-top:.8rem}.sfsa-inputs{grid-template-columns:1fr 1fr;padding:.85rem 1rem}.sfsa-genbar{grid-template-columns:1fr;padding:.75rem 1rem}.sfsa-filebar{grid-template-columns:1fr 1fr;padding:.75rem 1rem}.sfsa-filemeta{grid-column:1/-1}.sfsa-controls{grid-template-columns:1fr 1fr;padding:.85rem 1rem}.sfsa-view{padding:.85rem 1rem}.sfsa canvas{height:300px}.sfsa-canvaswrap{min-height:300px}.sfsa-resolution{width:100%;margin:.25rem 0 0}.sfsa-avgstatus{width:100%}.sfsa-disclosure>summary{padding:.55rem 1rem}.sfsa-readouts{grid-template-columns:1fr;padding:0 1rem .85rem}.sfsa-card{min-height:0}.sfsa-peaks{padding:0 1rem 1rem}.sfsa-table thead{display:none}.sfsa-table,.sfsa-table tbody,.sfsa-table tr,.sfsa-table td{display:block}.sfsa-table tr{display:grid;grid-template-columns:2.2rem 1fr 1fr 1fr;border-top:1px solid var(--line)}.sfsa-table td{border:0;padding:.58rem .35rem}.sfsa-foot{display:block;padding:.85rem 1rem}.sfsa-foot span{display:block}.sfsa-foot span+span{margin-top:.35rem}}
+    @media(max-width:460px){.sfsa-controls{grid-template-columns:1fr}.sfsa-table tr{grid-template-columns:1.7rem 1.05fr .75fr 1.2fr}.sfsa-table td{font-size:.78rem}.sfsa canvas{height:270px}.sfsa-canvaswrap{min-height:270px}}
+    @media(prefers-reduced-motion:reduce){.sfsa *{scroll-behavior:auto!important}}
+  </style>
+
+  <header class="sfsa-head">
+    <div>
+      <p class="sfsa-kicker">Free browser FFT tool · no audio upload</p>
+      <h2 id="sfsa-title">Audio spectrum analyzer</h2>
+      <p class="sfsa-sub">Open a local file, use the microphone, run a 440 Hz test or generate pink noise. Inspect frequency peaks in real time. The 440 Hz test is silent; selected files play through your output; pink noise reaches the speakers only when you press Play pink noise.</p>
+    </div>
+    <span class="sfsa-status" data-status data-active="false">Ready</span>
+  </header>
+
+  <input class="sfsa-file" type="file" accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.ogg,.opus,.aiff,.aif" data-file-input aria-hidden="true" tabindex="-1">
+  <div class="sfsa-inputs" role="group" aria-label="Choose an audio source">
+    <button class="sfsa-primary" type="button" data-choose-file>Choose audio file</button>
+    <button type="button" data-microphone>Use microphone</button>
+    <button type="button" data-tone>Silent 440 Hz test</button>
+    <button type="button" data-pink-direct>Pink noise (direct)</button>
+  </div>
+
+  <div class="sfsa-filebar">
+    <div class="sfsa-filemeta" data-file-meta><strong>No source selected.</strong> Choose a file, microphone or test tone.</div>
+    <button type="button" data-play disabled>Play</button>
+    <button type="button" data-stop disabled>Stop</button>
+  </div>
+
+  <div class="sfsa-genbar" role="group" aria-label="Pink noise generator">
+    <div class="sfsa-genmeta"><strong>Pink noise generator</strong> · <span data-pink-meta>Speakers silent. Play it here and pick Use microphone to measure a speaker or room.</span></div>
+    <div class="sfsa-genlevel"><label for="sfsa-pink-level">Level</label><input id="sfsa-pink-level" data-pink-level type="range" min="-40" max="-15" step="1" value="-30"><output data-pink-level-value>−30 dBFS RMS</output></div>
+    <button type="button" data-pink-play aria-pressed="false">Play pink noise</button>
+  </div>
+
+  <details class="sfsa-disclosure">
+    <summary><span>Analyzer settings</span><small>FFT size, scale, channel, smoothing and averaging</small></summary>
+  <div class="sfsa-controls">
+    <div class="sfsa-field">
+      <label for="sfsa-fft">FFT size</label>
+      <select id="sfsa-fft" data-fft>
+        <option value="2048">2048</option><option value="4096" selected>4096</option><option value="8192">8192</option><option value="16384">16384</option><option value="32768">32768</option>
+      </select>
+    </div>
+    <div class="sfsa-field">
+      <label for="sfsa-scale">Frequency scale</label>
+      <select id="sfsa-scale" data-scale><option value="log" selected>Logarithmic</option><option value="linear">Linear</option></select>
+    </div>
+    <div class="sfsa-field">
+      <label for="sfsa-channel">Channel</label>
+      <select id="sfsa-channel" data-channel><option value="mix" selected>Mix / mono</option><option value="left">Left</option><option value="right">Right</option></select>
+    </div>
+    <div class="sfsa-field">
+      <label for="sfsa-smoothing">Smoothing</label>
+      <div class="sfsa-range"><input id="sfsa-smoothing" data-smoothing type="range" min="0" max="0.95" step="0.05" value="0.70"><output data-smoothing-value>0.70</output></div>
+    </div>
+    <div class="sfsa-field">
+      <label for="sfsa-avg-mode">Averaging</label>
+      <select id="sfsa-avg-mode" data-avg-mode>
+        <option value="off" selected>Off</option>
+        <option value="exp">Exponential (time constant)</option>
+        <option value="linear">Linear (sliding window)</option>
+        <option value="infinite">Infinite (since reset)</option>
+      </select>
+    </div>
+    <div class="sfsa-field">
+      <label for="sfsa-avg-time" data-avg-time-label>Average time</label>
+      <select id="sfsa-avg-time" data-avg-time disabled>
+        <option value="0.1">100 ms</option><option value="0.25">250 ms</option><option value="0.5">500 ms</option><option value="1" selected>1 s</option><option value="2">2 s</option><option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option><option value="30">30 s</option>
+      </select>
+    </div>
+  </div>
+  </details>
+
+  <div class="sfsa-view">
+    <div class="sfsa-canvaswrap" data-canvas-wrap data-cursor="false">
+      <canvas data-canvas aria-label="FFT spectrum graph from 20 hertz to 20 kilohertz"></canvas>
+      <div class="sfsa-cursor" data-cursor-readout></div>
+    </div>
+    <div class="sfsa-actions">
+      <button type="button" data-freeze aria-pressed="false">Freeze</button>
+      <button type="button" data-peak aria-pressed="true">Peak hold on</button>
+      <button type="button" data-reset-peaks>Reset peaks</button>
+      <button type="button" data-reset-avg disabled>Reset average</button>
+      <button type="button" data-csv disabled>Download CSV</button>
+      <button type="button" data-png disabled>Download PNG</button>
+      <span class="sfsa-avgstatus" data-avg-status></span>
+      <span class="sfsa-resolution" data-resolution>Resolution —</span>
+    </div>
+  </div>
+
+  <div class="sfsa-readouts" aria-live="polite">
+    <div class="sfsa-card"><span>Dominant frequency</span><strong data-dominant>—</strong><small data-dominant-note>Start an input</small></div>
+    <div class="sfsa-card"><span>FFT peak level</span><strong data-level>—</strong><small>Per-bin magnitude; not RMS, sample peak or SPL</small></div>
+    <div class="sfsa-card"><span>Input</span><strong data-source>None</strong><small data-rate>Sample rate —</small></div>
+  </div>
+
+  <details class="sfsa-disclosure sfsa-peak-disclosure">
+    <summary><span>Peak table</span><small>Spectral peaks; note labels may identify harmonics</small></summary>
+  <div class="sfsa-peaks">
+    <h3 data-peaks-title>Strongest spectral peaks</h3>
+    <table class="sfsa-table">
+      <thead><tr><th>#</th><th>Frequency</th><th>Level</th><th>Nearest note</th></tr></thead>
+      <tbody data-peak-rows><tr><td>—</td><td>Waiting</td><td>—</td><td>—</td></tr></tbody>
+    </table>
+  </div>
+  </details>
+
+  <footer class="sfsa-foot">
+    <span><strong>Privacy:</strong> audio samples, filenames and readings stay in this page.</span>
+    <span><strong>Limit:</strong> an ordinary microphone is not a calibrated sound-level meter.</span>
+    <span><strong>Pink noise:</strong> start at low volume; loud noise can damage tweeters and hearing.</span>
+  </footer>
+  <div class="sfsa-live" data-live aria-live="assertive"></div>
+
+  <script>
+  (() => {
+    const root = document.currentScript.closest('[data-sf-spectrum-analyzer]');
+    if (!root || root.dataset.ready === 'true') return;
+    root.dataset.ready = 'true';
+    const q = (s) => root.querySelector(s);
+    const els = {
+      status:q('[data-status]'), file:q('[data-file-input]'), choose:q('[data-choose-file]'), mic:q('[data-microphone]'), tone:q('[data-tone]'),
+      meta:q('[data-file-meta]'), play:q('[data-play]'), stop:q('[data-stop]'), fft:q('[data-fft]'), scale:q('[data-scale]'), channel:q('[data-channel]'),
+      smoothing:q('[data-smoothing]'), smoothingValue:q('[data-smoothing-value]'), canvas:q('[data-canvas]'), wrap:q('[data-canvas-wrap]'), cursor:q('[data-cursor-readout]'),
+      freeze:q('[data-freeze]'), peak:q('[data-peak]'), reset:q('[data-reset-peaks]'), csv:q('[data-csv]'), png:q('[data-png]'), resolution:q('[data-resolution]'),
+      dominant:q('[data-dominant]'), dominantNote:q('[data-dominant-note]'), level:q('[data-level]'), source:q('[data-source]'), rate:q('[data-rate]'), rows:q('[data-peak-rows]'), live:q('[data-live]'),
+      avgMode:q('[data-avg-mode]'), avgTime:q('[data-avg-time]'), avgTimeLabel:q('[data-avg-time-label]'), resetAvg:q('[data-reset-avg]'), avgStatus:q('[data-avg-status]'), peaksTitle:q('[data-peaks-title]'),
+      pinkDirect:q('[data-pink-direct]'), pinkPlay:q('[data-pink-play]'), pinkLevel:q('[data-pink-level]'), pinkLevelValue:q('[data-pink-level-value]'), pinkMeta:q('[data-pink-meta]')
+    };
+    const noteNames = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+    let ctx=null, analyser=null, mute=null, splitter=null, selectedChannel=null, activeNode=null, mediaNode=null, mediaUrl=null, media=null, stream=null, oscillator=null;
+    let generation=0, cancelLoad=null, sourceChannels=1;
+    let mode='none', frozen=false, showPeak=true, frame=0, lastRead=0, bins=new Float32Array(0), held=new Float32Array(0), hasFrame=false;
+    // Time averaging runs in the power domain (dBFS -> |X|^2 -> mean -> dBFS), so it tracks the RMS spectrum rather than a mean of dB values.
+    // Linear mode keeps AVG_BLOCKS partial sums instead of every frame, so the sliding window costs O(bins) per frame and ~AVG_BLOCKS*bins memory.
+    const AVG_BLOCKS=16, DB_TO_POW=Math.LN10/10;
+    let avgDb=new Float32Array(0), avgPow=new Float64Array(0), avgSum=new Float64Array(0), avgSumN=0, avgSumMs=0;
+    let avgRing=[], avgPool=[], avgCur=null, avgFrames=0, avgElapsed=0, avgLast=null;
+    // Pink noise generator: one looping source -> level -> out (speakers, gated) and -> tap (analyzer, when "direct" is the source).
+    // It is independent of the analyzer source, so it keeps playing while the microphone is analyzed.
+    const PINK_BUFFER_DBFS=-20;
+    let pink=null, pinkOn=false;
+
+    function track(action){ try{ window.dataLayer && window.dataLayer.push({event:'audio_tool_action',tool_name:'audio_spectrum_analyzer',action}); }catch(e){} }
+    function announce(message){ els.live.textContent=''; requestAnimationFrame(()=>{els.live.textContent=message;}); }
+    function setStatus(text, active=false){ els.status.textContent=text; els.status.dataset.active=String(active); }
+    function clamp(v,a,b){ return Math.min(b,Math.max(a,v)); }
+    function noteFor(freq){
+      if (!Number.isFinite(freq) || freq<=0) return {name:'—',cents:0};
+      const midi=69+12*Math.log2(freq/440), rounded=Math.round(midi), cents=Math.round((midi-rounded)*100);
+      return {name:`${noteNames[((rounded%12)+12)%12]}${Math.floor(rounded/12)-1}`,cents};
+    }
+    function fmtHz(freq){ return freq>=1000 ? `${(freq/1000).toFixed(freq>=10000?1:2)} kHz` : `${Math.round(freq)} Hz`; }
+    function dbText(v){ return Number.isFinite(v) ? `${v.toFixed(1)} dBFS` : '—'; }
+    async function ensureAudio(){
+      if (!ctx){
+        const AC=window.AudioContext||window.webkitAudioContext;
+        if(!AC) throw new Error('This browser does not expose the Web Audio API.');
+        ctx=new AC(); analyser=ctx.createAnalyser(); mute=ctx.createGain(); mute.gain.value=0; analyser.connect(mute).connect(ctx.destination); applyAnalyser();
+      }
+      if(ctx.state!=='running') await ctx.resume();
+      if(ctx.state!=='running') throw new Error('Audio is interrupted. Tap the source button again to resume.');
+    }
+    function applyAnalyser(){
+      if(!analyser) return;
+      analyser.fftSize=Number(els.fft.value); analyser.minDecibels=-120; analyser.maxDecibels=0; analyser.smoothingTimeConstant=Number(els.smoothing.value);
+      bins=new Float32Array(analyser.frequencyBinCount); held=new Float32Array(analyser.frequencyBinCount); held.fill(-120); hasFrame=false;els.dominant.textContent='—';els.level.textContent='—';els.dominantNote.textContent='Waiting for a new frame';els.rows.innerHTML='<tr><td>—</td><td>Waiting</td><td>—</td><td>—</td></tr>'; resetAverage(); updateResolution();
+    }
+    function updateResolution(){
+      if(!ctx||!analyser){ els.resolution.textContent='Resolution —'; return; }
+      els.resolution.textContent=`${(ctx.sampleRate/analyser.fftSize).toFixed(2)} Hz/bin · ${analyser.fftSize} FFT`;
+      els.rate.textContent=`Context rate ${(ctx.sampleRate/1000).toFixed(1)} kHz · Nyquist ${(ctx.sampleRate/2000).toFixed(1)} kHz`;
+    }
+    function avgReady(){ return els.avgMode.value!=='off' && avgFrames>0; }
+    function avgLabel(){
+      const m=els.avgMode.value,t=Number(els.avgTime.value),ts=t<1?`${Math.round(t*1000)} ms`:`${t} s`;
+      return m==='exp'?`exp τ ${ts}`:m==='linear'?`linear ${ts}`:m==='infinite'?'infinite':'off';
+    }
+    function takeBlock(){ const sum=avgPool.pop()||new Float64Array(bins.length); sum.fill(0); return {sum,n:0,ms:0}; }
+    function resetAverage(){
+      avgRing.forEach(b=>avgPool.push(b.sum)); if(avgCur) avgPool.push(avgCur.sum); avgRing=[]; avgCur=null;
+      const n=bins.length;
+      if(avgDb.length!==n){ avgDb=new Float32Array(n); avgPow=new Float64Array(n); avgSum=new Float64Array(n); avgPool=[]; }
+      avgDb.fill(-Infinity); avgPow.fill(0); avgSum.fill(0);
+      avgSumN=0; avgSumMs=0; avgFrames=0; avgElapsed=0; avgLast=null;
+      updateAvgUi();
+    }
+    function accumulateAverage(now){
+      const m=els.avgMode.value, n=bins.length;
+      if(m==='off') return;
+      if(avgDb.length!==n) resetAverage();
+      // Gaps (hidden tab, pause, freeze) count as one short step rather than a jump in time.
+      const dt=avgLast===null?1000/60:clamp(now-avgLast,0,250);
+      avgLast=now; avgFrames++; avgElapsed+=dt;
+      if(m==='exp'){
+        const a=avgFrames===1?1:1-Math.exp(-dt/(Number(els.avgTime.value)*1000));
+        for(let i=0;i<n;i++){ const p=Number.isFinite(bins[i])?Math.exp(bins[i]*DB_TO_POW):0; avgPow[i]+=a*(p-avgPow[i]); avgDb[i]=avgPow[i]>0?10*Math.log10(avgPow[i]):-Infinity; }
+        return;
+      }
+      if(m==='infinite'){
+        for(let i=0;i<n;i++){ if(Number.isFinite(bins[i])) avgSum[i]+=Math.exp(bins[i]*DB_TO_POW); avgDb[i]=avgSum[i]>0?10*Math.log10(avgSum[i]/avgFrames):-Infinity; }
+        return;
+      }
+      // Linear: completed blocks live in avgRing (their total in avgSum); the open block is avgCur. Window spans (1-1/AVG_BLOCKS)·T to T.
+      const blockMs=Number(els.avgTime.value)*1000/AVG_BLOCKS;
+      if(!avgCur) avgCur=takeBlock();
+      const cur=avgCur.sum;
+      for(let i=0;i<n;i++){ if(Number.isFinite(bins[i])) cur[i]+=Math.exp(bins[i]*DB_TO_POW); }
+      avgCur.n++; avgCur.ms+=dt;
+      if(avgCur.ms>=blockMs){
+        for(let i=0;i<n;i++) avgSum[i]+=cur[i];
+        avgSumN+=avgCur.n; avgSumMs+=avgCur.ms; avgRing.push(avgCur); avgCur=null;
+        while(avgRing.length>AVG_BLOCKS-1){ const old=avgRing.shift(); for(let i=0;i<n;i++) avgSum[i]-=old.sum[i]; avgSumN-=old.n; avgSumMs-=old.ms; avgPool.push(old.sum); }
+      }
+      const count=avgSumN+(avgCur?avgCur.n:0);
+      for(let i=0;i<n;i++){ const s=avgSum[i]+(avgCur?avgCur.sum[i]:0); avgDb[i]=s>0?10*Math.log10(s/count):-Infinity; }
+    }
+    function updateAvgUi(){
+      const m=els.avgMode.value;
+      els.avgTime.disabled=m==='off'||m==='infinite';
+      els.avgTimeLabel.textContent=m==='exp'?'Time constant (τ)':m==='linear'?'Window length':'Average time';
+      els.resetAvg.disabled=m==='off';
+      els.peaksTitle.textContent=m==='off'?'Strongest spectral peaks':'Strongest spectral peaks · time-averaged';
+      updateAvgStatus();
+    }
+    function updateAvgStatus(){
+      const m=els.avgMode.value;
+      if(m==='off'){ els.avgStatus.textContent=''; return; }
+      const sec=(ms)=>`${(ms/1000).toFixed(1)} s`, t=Number(els.avgTime.value)*1000;
+      const detail=!avgFrames?'waiting'
+        :m==='linear'?`${sec(Math.min(t,avgSumMs+(avgCur?avgCur.ms:0)))} of ${sec(t)} filled`
+        :m==='exp'?`${sec(avgElapsed)} · ${avgElapsed>=5*t?'settled':'settling'}`
+        :`${sec(avgElapsed)} · ${avgFrames} frames`;
+      els.avgStatus.textContent=`Avg ${avgLabel()} · ${detail}`;
+    }
+    function disconnectActive(){
+      if(cancelLoad){cancelLoad();cancelLoad=null;}
+      try{activeNode&&activeNode.disconnect();}catch(e){}
+      try{selectedChannel&&selectedChannel.disconnect();}catch(e){}
+      try{splitter&&splitter.disconnect();}catch(e){}
+      activeNode=null; selectedChannel=null; splitter=null;
+      if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+      if(oscillator){try{oscillator.stop();}catch(e){} oscillator=null;}
+      if(media){media.pause();media.currentTime=0;}
+      els.play.textContent='Play';
+    }
+    function connectNode(node, channels=1){
+      if(!analyser) return;
+      sourceChannels=channels;
+      const choice=els.channel.value;
+      if(channels>1 && choice!=='mix'){
+        splitter=ctx.createChannelSplitter(channels); selectedChannel=ctx.createGain(); node.connect(splitter); splitter.connect(selectedChannel,choice==='right'?1:0); selectedChannel.connect(analyser); activeNode=node;
+      }else{node.connect(analyser);activeNode=node;}
+    }
+    function setMode(next,label){
+      mode=next; frozen=false; els.freeze.textContent='Freeze';els.freeze.setAttribute('aria-pressed','false');els.dominant.textContent='—';els.dominantNote.textContent='Start an input';els.level.textContent='—';els.rows.innerHTML='<tr><td>—</td><td>Waiting</td><td>—</td><td>—</td></tr>';els.source.textContent=label; els.stop.disabled=next==='none'; els.csv.disabled=true; els.png.disabled=true; hasFrame=false; held.fill(-120); resetAverage(); updatePinkUi(); setStatus(next==='none'?'Ready':'Analyzing',next!=='none');requestRender();
+    }
+    function beginSource(label){
+      const id=++generation;disconnectActive();if(analyser){analyser.disconnect();analyser=ctx.createAnalyser();analyser.connect(mute);applyAnalyser();}setMode('none','None');els.stop.disabled=false;els.play.disabled=true;setStatus(label,false);return id;
+    }
+    async function chooseFile(file){
+      if(!file)return;const id=beginSource('Loading file');
+      try{
+        await ensureAudio();if(id!==generation)return;
+        if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(file);
+        if(!media){media=new Audio();media.preload='auto';media.crossOrigin='anonymous';mediaNode=ctx.createMediaElementSource(media);media.addEventListener('ended',()=>{if(mode==='file'){els.play.textContent='Play';setStatus('File ended',false);requestRender();}});}
+        await new Promise((resolve,reject)=>{
+          let timer;const cleanup=()=>{clearTimeout(timer);media.removeEventListener('canplay',ok);media.removeEventListener('error',bad);cancelLoad=null;};
+          const ok=()=>{cleanup();resolve();},bad=()=>{cleanup();reject(new Error('This file could not be decoded. Try a short PCM WAV or another browser-supported format.'));};
+          cancelLoad=()=>{cleanup();resolve();};media.addEventListener('canplay',ok,{once:true});media.addEventListener('error',bad,{once:true});timer=setTimeout(bad,20000);media.src=mediaUrl;media.load();
+        });
+        if(id!==generation)return;
+        connectNode(mediaNode,2);mediaNode.connect(ctx.destination);setMode('file','Audio file');els.play.disabled=false;
+        els.meta.textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MiB · '+(Number.isFinite(media.duration)?formatTime(media.duration):'duration unknown');
+        try{await media.play();if(id!==generation)return;els.play.textContent='Pause';track('file_started');announce('Audio file playing.');requestRender();}
+        catch(e){if(id!==generation)return;setStatus('Ready to play',false);els.play.textContent='Play';announce('Tap Play to start the selected file.');}
+      }catch(e){if(id===generation){stopAll();showError(e);}}
+    }
+    function formatTime(s){const m=Math.floor(s/60),r=Math.round(s%60);return `${m}:${String(r).padStart(2,'0')}`;}
+    async function startMic(){
+      const id=beginSource('Waiting for microphone');
+      try{
+        await ensureAudio();if(id!==generation)return;
+        if(!navigator.mediaDevices?.getUserMedia)throw new Error('Microphone access is unavailable. Open this page over HTTPS in a supported browser.');
+        const pending=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+        if(id!==generation){pending.getTracks().forEach(t=>t.stop());return;}
+        stream=pending;const node=ctx.createMediaStreamSource(stream),channels=stream.getAudioTracks()[0]?.getSettings().channelCount||1;
+        connectNode(node,channels);setMode('microphone','Microphone');els.play.disabled=true;els.meta.textContent='Microphone active. Analyzed locally; not routed to speakers.';track('microphone_started');announce('Microphone spectrum started.');
+      }catch(e){if(id===generation){stopAll();showError(e);}}
+    }
+    async function startTone(){
+      const id=beginSource('Starting silent test');
+      try{
+        await ensureAudio();if(id!==generation)return;
+        oscillator=ctx.createOscillator();const gain=ctx.createGain();oscillator.type='sine';oscillator.frequency.value=440;gain.gain.value=.4;oscillator.connect(gain);connectNode(gain,1);oscillator.start();
+        setMode('tone','440 Hz test');els.play.disabled=true;els.meta.textContent='Silent 440 Hz / A4 test. Checks the display path, not your speakers or microphone.';track('tone_started');announce('Silent 440 hertz analysis started.');
+      }catch(e){if(id===generation){stopAll();showError(e);}}
+    }
+    function makePinkBuffer(){
+      // Paul Kellet's refined pink filter (±0.05 dB above ~10 Hz) on white noise; 10 s loop, normalized to PINK_BUFFER_DBFS RMS.
+      const sr=ctx.sampleRate,len=Math.round(sr*10),fade=Math.round(sr*.05),warm=Math.round(sr*.5),x=new Float32Array(len+fade);
+      let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+      for(let i=-warm;i<len+fade;i++){
+        const w=Math.random()*2-1;
+        b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;
+        const p=b0+b1+b2+b3+b4+b5+b6+w*.5362;b6=w*.115926;if(i>=0)x[i]=p;
+      }
+      // Equal-power crossfade of the tail into the head: sample len-1 is followed by sample len of the same run, so the loop has no seam.
+      for(let i=0;i<fade;i++){const t=Math.PI/2*i/fade;x[i]=x[i]*Math.sin(t)+x[len+i]*Math.cos(t);}
+      let ss=0;for(let i=0;i<len;i++)ss+=x[i]*x[i];
+      const k=Math.pow(10,PINK_BUFFER_DBFS/20)/Math.sqrt(ss/len),buf=ctx.createBuffer(1,len,sr),d=buf.getChannelData(0);
+      for(let i=0;i<len;i++)d[i]=x[i]*k;
+      return buf;
+    }
+    function pinkGain(){ return Math.pow(10,(Number(els.pinkLevel.value)-PINK_BUFFER_DBFS)/20); }
+    function ensurePink(){
+      if(pink) return pink;
+      const src=ctx.createBufferSource(),level=ctx.createGain(),out=ctx.createGain(),tap=ctx.createGain();
+      src.buffer=makePinkBuffer();src.loop=true;level.gain.value=pinkGain();out.gain.value=0;
+      src.connect(level);level.connect(out).connect(ctx.destination);level.connect(tap);src.start();
+      pink={src,level,out,tap};return pink;
+    }
+    function rampPinkOut(on){ if(!pink)return; const t=ctx.currentTime,g=pink.out.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value,t); g.linearRampToValueAtTime(on?1:0,t+.08); }
+    function updatePinkUi(){
+      const lv=`${Number(els.pinkLevel.value)<0?'−':''}${Math.abs(Number(els.pinkLevel.value))} dBFS RMS`;
+      els.pinkLevelValue.value=lv;
+      els.pinkPlay.textContent=pinkOn?'Stop pink noise':'Play pink noise';els.pinkPlay.setAttribute('aria-pressed',String(pinkOn));
+      els.pinkMeta.textContent=pinkOn?`Playing through speakers at ${lv}.${mode==='microphone'?' Microphone is measuring it.':mode==='pink'?' Analyzer reads the generator directly.':' Pick Use microphone to measure it acoustically.'}`
+        :mode==='pink'?'Analyzer reads the generator directly; speakers silent.':'Speakers silent. Play it here and pick Use microphone to measure a speaker or room.';
+    }
+    async function togglePinkOut(){
+      try{
+        await ensureAudio();ensurePink();pinkOn=!pinkOn;rampPinkOut(pinkOn);updatePinkUi();
+        track(pinkOn?'pink_output_started':'pink_output_stopped');announce(pinkOn?'Pink noise playing through speakers.':'Pink noise stopped.');
+      }catch(e){showError(e);}
+    }
+    async function startPinkDirect(){
+      const id=beginSource('Starting pink noise');
+      try{
+        await ensureAudio();if(id!==generation)return;
+        connectNode(ensurePink().tap,1);setMode('pink','Pink noise (direct)');els.play.disabled=true;
+        els.meta.textContent='Analyzing the pink noise generator directly (no microphone). Pink noise falls 3 dB per octave on an FFT, so it slopes down here.';
+        updatePinkUi();track('pink_direct_started');announce('Pink noise analysis started.');
+      }catch(e){if(id===generation){stopAll();showError(e);}}
+    }
+    function stopAll(){++generation;disconnectActive();setMode('none','None');els.meta.textContent='No source selected. Choose a file, microphone or silent test.';els.play.disabled=true;announce('Analysis stopped.');}
+    function reconnectForChannel(){
+      if(!activeNode||!ctx||!analyser)return;
+      const node=activeNode,channels=sourceChannels;try{node.disconnect();}catch(e){}try{selectedChannel&&selectedChannel.disconnect();splitter&&splitter.disconnect();}catch(e){}
+      selectedChannel=null;splitter=null;analyser.disconnect();analyser=ctx.createAnalyser();analyser.connect(mute);applyAnalyser();connectNode(node,channels);if(mode==='file')node.connect(ctx.destination);frozen=false;els.freeze.textContent='Freeze';els.freeze.setAttribute('aria-pressed','false');requestRender();
+    }
+    function plotBox(w,h=els.canvas.height){const scale=w/Math.max(1,els.canvas.clientWidth||w),left=46*scale,right=14*scale,top=10*scale,bottom=27*scale;return{scale,left,right,top,bottom,width:Math.max(1,w-left-right),height:Math.max(1,h-top-bottom)};}
+    function xFor(freq,w){const max=ctx?Math.min(20000,ctx.sampleRate/2):20000,p=plotBox(w);const ratio=els.scale.value==='linear'?clamp(freq/max,0,1):clamp((Math.log10(Math.max(20,freq))-Math.log10(20))/(Math.log10(max)-Math.log10(20)),0,1);return p.left+ratio*p.width;}
+    function freqFor(x,w){const max=ctx?Math.min(20000,ctx.sampleRate/2):20000,p=plotBox(w),ratio=clamp((x-p.left)/p.width,0,1);return els.scale.value==='linear'?ratio*max:Math.pow(10,Math.log10(20)+ratio*(Math.log10(max)-Math.log10(20)));}
+    function resize(){const rect=els.canvas.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);const w=Math.max(320,Math.round(rect.width*dpr)),h=Math.round(rect.height*dpr);if(els.canvas.width!==w||els.canvas.height!==h){els.canvas.width=w;els.canvas.height=h;}}
+    function drawGrid(g,w,h){
+      const p=plotBox(w,h);g.fillStyle='#0f1114';g.fillRect(0,0,w,h);g.strokeStyle='#343039';g.lineWidth=1;g.font=`${12*p.scale}px ui-monospace,monospace`;g.fillStyle='#aaa1aa';
+      for(let db=-120;db<=0;db+=20){const y=p.top+(1-(db+120)/120)*p.height;g.beginPath();g.moveTo(p.left,y);g.lineTo(w-p.right,y);g.stroke();g.fillText(`${db}`,5*p.scale,clamp(y-4*p.scale,12*p.scale,h-p.bottom-3*p.scale));}
+      const narrow=els.canvas.clientWidth<420;
+      const ticks=els.scale.value==='log'?(narrow?[20,100,500,1000,5000,20000]:[20,50,100,200,500,1000,2000,5000,10000,20000]):(narrow?[0,5000,10000,20000]:[0,5000,10000,15000,20000]);
+      ticks.forEach(f=>{if(ctx&&f>ctx.sampleRate/2)return;const x=xFor(f,w);g.beginPath();g.moveTo(x,p.top);g.lineTo(x,h-p.bottom);g.stroke();const label=f>=1000?`${f/1000}k`:`${f}`;const labelWidth=g.measureText(label).width;g.fillText(label,clamp(x-labelWidth/2,p.left,w-p.right-labelWidth),h-7*p.scale);});
+    }
+    function drawCurve(g,values,w,h,color,fill){
+      if(!ctx||!values.length)return;const max=Math.min(20000,ctx.sampleRate/2),binHz=ctx.sampleRate/analyser.fftSize,p=plotBox(w,h);g.beginPath();let started=false,firstX=p.left,lastX=p.left;
+      for(let i=1;i<values.length;i++){const f=i*binHz;if(f<20||f>max)continue;const x=xFor(f,w),v=Number.isFinite(values[i])?values[i]:-120,y=p.top+(1-clamp((v+120)/120,0,1))*p.height;if(!started){g.moveTo(x,y);firstX=x;started=true;}else g.lineTo(x,y);lastX=x;}
+      if(!started)return;g.strokeStyle=color;g.lineWidth=Math.max(1.25,(window.devicePixelRatio||1)*1.15);g.stroke();if(fill){g.lineTo(lastX,p.top+p.height);g.lineTo(firstX,p.top+p.height);g.closePath();const grad=g.createLinearGradient(0,p.top,0,p.top+p.height);grad.addColorStop(0,fill[0]);grad.addColorStop(1,fill[1]);g.fillStyle=grad;g.fill();}
+    }
+    function drawLegend(g,w,h){
+      const p=plotBox(w,h),s=p.scale,items=[['#ffd166',`Average · ${avgLabel()}`],['rgba(85,214,195,.8)','Live']];
+      if(showPeak) items.push(['rgba(255,79,145,.85)','Peak hold']);
+      g.font=`${11*s}px ui-monospace,monospace`;g.textBaseline='middle';
+      const tw=Math.max(...items.map(([,t])=>g.measureText(t).width)),boxW=tw+34*s,row=16*s,x0=w-p.right-boxW-6*s,y0=p.top+6*s;
+      g.fillStyle='rgba(15,17,20,.82)';g.fillRect(x0,y0,boxW,items.length*row+8*s);
+      items.forEach(([c,t],k)=>{const y=y0+4*s+row*(k+.5);g.strokeStyle=c;g.lineWidth=2*s;g.beginPath();g.moveTo(x0+8*s,y);g.lineTo(x0+22*s,y);g.stroke();g.fillStyle='#e8e2e6';g.fillText(t,x0+28*s,y);});
+      g.textBaseline='alphabetic';
+    }
+    function peaks(values){
+      if(!ctx||!values.length)return[];const binHz=ctx.sampleRate/analyser.fftSize,max=Math.min(20000,ctx.sampleRate/2),out=[];
+      for(let i=Math.max(2,Math.ceil(20/binHz));i<Math.min(values.length-2,Math.floor(max/binHz));i++){
+        const v=values[i];
+        if(Number.isFinite(v)&&v>-115&&v>=values[i-1]&&v>values[i+1]){
+          const denominator=values[i-1]-2*v+values[i+1];
+          const offset=Math.abs(denominator)>1e-9?clamp(.5*(values[i-1]-values[i+1])/denominator,-.5,.5):0;
+          out.push({i,f:(i+offset)*binHz,db:v});
+        }
+      }
+      out.sort((a,b)=>b.db-a.db);const chosen=[];for(const p of out){if(chosen.every(x=>Math.abs(1200*Math.log2(p.f/x.f))>70)){chosen.push(p);if(chosen.length===5)break;}}return chosen;
+    }
+    function updateReadouts(now){
+      if(now-lastRead<140||!hasFrame)return;lastRead=now;updateAvgStatus();const useAvg=avgReady(),list=peaks(useAvg?avgDb:bins),top=list[0];if(top){const n=noteFor(top.f);els.dominant.textContent=fmtHz(top.f);els.dominantNote.textContent=`${n.name} ${n.cents>=0?'+':''}${n.cents} cents${useAvg?' · averaged':''}`;els.level.textContent=dbText(top.db);}else{els.dominant.textContent='—';els.dominantNote.textContent='No stable peak';els.level.textContent='—';}
+      els.rows.innerHTML=(list.length?list:Array.from({length:1},()=>null)).map((p,i)=>p?`<tr><td>${i+1}</td><td>${fmtHz(p.f)}</td><td>${p.db.toFixed(1)} dBFS</td><td>${noteFor(p.f).name} ${noteFor(p.f).cents>=0?'+':''}${noteFor(p.f).cents}¢</td></tr>`:'<tr><td>—</td><td>No peak</td><td>—</td><td>—</td></tr>').join('');
+    }
+    function requestRender(){if(!frame)frame=requestAnimationFrame(render);}
+    function render(now=0){
+      frame=0;
+      resize();const g=els.canvas.getContext('2d'),w=els.canvas.width,h=els.canvas.height;drawGrid(g,w,h);
+      if(analyser&&mode!=='none'&&!frozen&&!(mode==='file'&&media.paused)){analyser.getFloatFrequencyData(bins);for(let i=0;i<bins.length;i++){if(Number.isFinite(bins[i]))held[i]=Math.max(held[i]??-120,bins[i]);}hasFrame=true;accumulateAverage(now);els.csv.disabled=false;els.png.disabled=false;}else avgLast=null;
+      if(hasFrame){
+        if(showPeak)drawCurve(g,held,w,h,'rgba(255,79,145,.72)',null);
+        if(avgReady()){drawCurve(g,bins,w,h,'rgba(85,214,195,.45)',null);drawCurve(g,avgDb,w,h,'#ffd166',['rgba(255,209,102,.30)','rgba(255,79,145,.04)']);drawLegend(g,w,h);}
+        else drawCurve(g,bins,w,h,'#55d6c3',['rgba(85,214,195,.35)','rgba(255,79,145,.05)']);
+        updateReadouts(now);
+      }else{g.fillStyle='#c7bec7';g.font=`${16*(window.devicePixelRatio||1)}px system-ui,sans-serif`;g.textAlign='center';g.fillText('Choose an audio source to begin',w/2,h/2);g.textAlign='left';}
+      if(mode!=='none'&&!frozen&&!(mode==='file'&&media.paused))requestRender();
+    }
+    function downloadBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+    function exportCsv(){if(!hasFrame||!ctx)return;const binHz=ctx.sampleRate/analyser.fftSize,useAvg=avgReady(),rows=['frequency_hz,current_dbfs,peak_hold_dbfs,average_dbfs'];for(let i=1;i<bins.length;i++){rows.push(`${(i*binHz).toFixed(4)},${Number.isFinite(bins[i])?bins[i].toFixed(4):''},${Number.isFinite(held[i])?held[i].toFixed(4):''},${useAvg&&Number.isFinite(avgDb[i])?avgDb[i].toFixed(4):''}`);}downloadBlob(new Blob([rows.join('\n')],{type:'text/csv'}),'audio-spectrum-current.csv');track('export_csv');}
+    function exportPng(){if(!hasFrame)return;const a=document.createElement('a');a.href=els.canvas.toDataURL('image/png');a.download='audio-spectrum-current.png';document.body.appendChild(a);a.click();a.remove();track('export_png');}
+    function showError(error){const msg=error?.name==='NotAllowedError'?'Microphone permission was not granted. Choose a file or the 440 Hz test instead.':(error?.message||'The analyzer could not start.');setStatus('Error',false);els.meta.textContent='Could not start. '+msg;announce(msg);}
+
+    els.choose.addEventListener('click',()=>els.file.click());
+    els.file.addEventListener('change',()=>chooseFile(els.file.files?.[0]).catch(showError));
+    els.mic.addEventListener('click',()=>startMic().catch(showError));els.tone.addEventListener('click',()=>startTone().catch(showError));els.stop.addEventListener('click',stopAll);
+    els.play.addEventListener('click',async()=>{if(mode!=='file'||!media)return;const id=generation;try{await ensureAudio();if(id!==generation)return;if(media.paused){await media.play();if(id!==generation)return;els.play.textContent='Pause';setStatus('Analyzing',true);}else{media.pause();els.play.textContent='Play';setStatus('Paused',false);}requestRender();}catch(e){if(id===generation)showError(e);}});
+    els.fft.addEventListener('change',()=>{applyAnalyser();frozen=false;els.freeze.textContent='Freeze';els.freeze.setAttribute('aria-pressed','false');requestRender();track('fft_changed');});els.smoothing.addEventListener('input',()=>{els.smoothingValue.value=Number(els.smoothing.value).toFixed(2);if(analyser)analyser.smoothingTimeConstant=Number(els.smoothing.value);});
+    els.channel.addEventListener('change',reconnectForChannel);els.scale.addEventListener('change',()=>{track('scale_changed');requestRender();});
+    els.freeze.addEventListener('click',()=>{frozen=!frozen;els.freeze.setAttribute('aria-pressed',String(frozen));els.freeze.textContent=frozen?'Unfreeze':'Freeze';setStatus(frozen?'Frozen':mode==='none'?'Ready':mode==='file'&&media.paused?'Paused':'Analyzing',!frozen&&mode!=='none');requestRender();});
+    els.peak.addEventListener('click',()=>{showPeak=!showPeak;els.peak.setAttribute('aria-pressed',String(showPeak));els.peak.textContent=showPeak?'Peak hold on':'Peak hold off';requestRender();});
+    els.reset.addEventListener('click',()=>{held.fill(-120);announce('Peak hold reset.');requestRender();});els.csv.addEventListener('click',exportCsv);els.png.addEventListener('click',exportPng);
+    els.avgMode.addEventListener('change',()=>{resetAverage();requestRender();track('averaging_changed');});
+    els.avgTime.addEventListener('change',()=>{resetAverage();requestRender();});
+    els.resetAvg.addEventListener('click',()=>{resetAverage();announce('Average reset.');requestRender();});
+    els.pinkDirect.addEventListener('click',()=>startPinkDirect().catch(showError));els.pinkPlay.addEventListener('click',togglePinkOut);
+    els.pinkLevel.addEventListener('input',()=>{if(pink)pink.level.gain.setTargetAtTime(pinkGain(),ctx.currentTime,.03);updatePinkUi();});
+    window.addEventListener('pagehide',()=>{if(pinkOn){pinkOn=false;rampPinkOut(false);updatePinkUi();}});
+    function cursorAt(event){if(!hasFrame||!ctx)return;const rect=els.canvas.getBoundingClientRect(),x=clamp(event.clientX-rect.left,0,rect.width),f=freqFor(x,rect.width),i=clamp(Math.round(f/(ctx.sampleRate/analyser.fftSize)),0,bins.length-1),n=noteFor(f),useAvg=avgReady();els.cursor.textContent=`${fmtHz(f)} · ${dbText(useAvg?avgDb[i]:bins[i])}${useAvg?' avg':''} · ${n.name} ${n.cents>=0?'+':''}${n.cents}¢`;els.cursor.style.left=`${clamp(x+10,4,rect.width-190)}px`;els.cursor.style.top=`${clamp(event.clientY-rect.top-34,4,rect.height-36)}px`;els.wrap.dataset.cursor='true';}
+    els.canvas.addEventListener('pointermove',cursorAt);els.canvas.addEventListener('pointerleave',()=>els.wrap.dataset.cursor='false');els.canvas.addEventListener('pointerdown',cursorAt);
+    window.addEventListener('resize',()=>{resize();requestRender();},{passive:true});window.addEventListener('pagehide',stopAll);window.addEventListener('beforeunload',()=>{cancelAnimationFrame(frame);disconnectActive();if(mediaUrl)URL.revokeObjectURL(mediaUrl);});
+    updateAvgUi();updatePinkUi();
+    requestRender();
+  })();
+  </script>
+</section>
+</main>
+</body>
+</html>
